@@ -588,39 +588,73 @@
         setMessage('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ index.html');
         return;
       }
+
+      // JSONP is used because this page is hosted on GitHub Pages while the API is GAS.
+      // Add a cache-buster and show a clear error if GAS never calls the callback.
       const callbackName = '__borrowPdaCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
       const script = document.createElement('script');
-      const payload = Object.assign({}, params, { callback: callbackName });
+      const payload = Object.assign({}, params, {
+        callback: callbackName,
+        _ts: Date.now()
+      });
       const query = Object.keys(payload).map(k =>
         encodeURIComponent(k) + '=' + encodeURIComponent(String(payload[k] == null ? '' : payload[k]))
       ).join('&');
+      const requestUrl = API_URL + (API_URL.includes('?') ? '&' : '?') + query;
       let finished = false;
+      let callbackReceived = false;
+
+      function cleanup() {
+        clearTimeout(timer);
+        script.onload = null;
+        script.onerror = null;
+        if (script.parentNode) script.parentNode.removeChild(script);
+        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+      }
+
       const timer = setTimeout(() => {
         if (finished) return;
         finished = true;
         cleanup();
         hideLoading();
-        setMessage('API ไม่ตอบกลับภายใน 25 วินาที กรุณาตรวจ API_URL และ Deployment');
+        setMessage('หมดเวลารอ GAS API (25 วินาที) — คำขอ: ' + (params.action || 'ไม่ระบุ') +
+          ', อุปกรณ์: ' + (params.deviceID || '-') +
+          '. เปิด URL API ทดสอบในเบราว์เซอร์เพื่อตรวจ Deployment');
       }, 25000);
-      function cleanup() {
-        clearTimeout(timer);
-        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
-        if (script.parentNode) script.parentNode.removeChild(script);
-      }
+
       window[callbackName] = result => {
         if (finished) return;
+        callbackReceived = true;
         finished = true;
         cleanup();
+        if (!result || typeof result !== 'object') {
+          hideLoading();
+          setMessage('GAS ส่งข้อมูลกลับมาในรูปแบบที่ไม่ถูกต้อง');
+          return;
+        }
         done(result);
       };
+
+      script.async = true;
       script.onerror = () => {
         if (finished) return;
         finished = true;
         cleanup();
         hideLoading();
-        setMessage('เรียก Apps Script API ไม่สำเร็จ กรุณาตรวจ URL และการ Deploy');
+        setMessage('โหลดสคริปต์จาก GAS ไม่สำเร็จ ตรวจสอบ URL และการ Deploy');
       };
-      script.src = API_URL + (API_URL.includes('?') ? '&' : '?') + query;
+      // A script can load successfully but still fail to call our callback.
+      script.onload = () => {
+        if (finished || callbackReceived) return;
+        setTimeout(() => {
+          if (finished || callbackReceived) return;
+          finished = true;
+          cleanup();
+          hideLoading();
+          setMessage('GAS โหลดสคริปต์แล้วแต่ไม่เรียก JSONP callback กรุณาตรวจ action/callback ใน Code.gs');
+        }, 1200);
+      };
+      script.src = requestUrl;
       document.head.appendChild(script);
     }
 
