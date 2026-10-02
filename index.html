@@ -320,7 +320,12 @@
           <i class="bi bi-person-badge me-1"></i>ชื่อผู้ยืม
         </label>
         <input type="text" class="form-control mb-2" id="borrower"
-              placeholder="ระบุชื่อ และแผนกให้ครบถ้วน">
+              placeholder="ระบุชื่อผู้ยืม" autocomplete="name">
+        <label class="form-label small fw-semibold mt-2" for="department">
+          <i class="bi bi-building me-1"></i>แผนก
+        </label>
+        <input type="text" class="form-control mb-2" id="department"
+              placeholder="ระบุแผนกของผู้ยืม" autocomplete="organization" required>
         <div class="small text-muted mb-3"><i class="bi bi-clock me-1"></i>ยืมได้ 10 ชั่วโมงต่ออุปกรณ์ และต้องคืนก่อนผู้ใช้อื่นยืมต่อ</div>
 
         <button class="btn btn-success w-100 py-3" onclick="borrow()">
@@ -705,12 +710,19 @@
         return;
       }
       const name = nameBase;
+      const department = document.getElementById('department').value.trim();
+
+      if (!department) {
+        showNotice('กรุณาระบุแผนก', 'warning');
+        document.getElementById('department').focus();
+        return;
+      }
 
       showLoading('กำลังบันทึกการยืม...');
 
       apiCall({
         action: 'borrow',
-        deviceID, userName: name, lineUserId, lineDisplayName, linePictureUrl
+        deviceID, userName: name, note: department, lineUserId, lineDisplayName, linePictureUrl
       }, res => {
         hideLoading();
         if (!res || !res.ok) { showNotice((res && res.error) || 'ยืมไม่สำเร็จ', 'error'); return; }
