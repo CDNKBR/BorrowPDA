@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>LIFF ยืมคืนอุปกรณ์ IT</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#020617;
+      --layer:#020617;
+      --card:#0b1220;
+      --card-soft:#111827;
+      --brand:#22c55e;
+      --brand-dark:#16a34a;
+      --text:#e5e7eb;
+      --muted:#cbd5f5;
+      --border:#1f2937;
+    }
+
+    body{
+      font-family:'IBM Plex Sans Thai',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      background:linear-gradient(180deg,#07111f 0%,#020617 100%);
+      min-height:100svh;
+      margin:0;
+      padding:10px 10px calc(18px + env(safe-area-inset-bottom));
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      color:var(--text);
+      font-size:16px;
+      box-sizing:border-box;
+    }
+
+    .card-main{
+      max-width:540px;
+      width:100%;
+      margin:0 auto;
+      border-radius:22px;
+      border:1px solid rgba(148,163,184,.4);
+      background:linear-gradient(145deg,#020617 0,#020617 40%,#020617 100%);
+      box-shadow:
+        0 26px 65px rgba(15,23,42,.9),
+        0 0 0 1px rgba(15,23,42,.9);
+      overflow:hidden;
+    }
+
+    .card-header-gradient{
+      background:linear-gradient(135deg,var(--brand-dark),var(--brand));
+      color:#ecfdf5;
+      padding:20px 24px;
+    }
+
+    .card-body{
+      background:radial-gradient(circle at top,#0b1120,#020617 55%);
+      padding:20px 18px 22px;
+    }
+
+    .status-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.45rem;
+      padding:.25rem .9rem;
+      border-radius:999px;
+      font-size:.88rem;
+      font-weight:600;
+    }
+    .status-ava{ background:#bbf7d0; color:#166534; }
+    .status-bor{ background:#fee2e2; color:#991b1b; }
+    .status-over{ background:#b91c1c; color:#fff; }
+
+    .liff-badge{
+      font-size:.75rem;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      opacity:.92;
+    }
+
+    h5#dev-name{
+      font-size:1.25rem;
+      color:#e5e7eb;
+    }
+
+    .text-muted{
+      color:var(--muted) !important;
+    }
+
+    .small{
+      font-size:.9rem;
+    }
+
+    .form-label{
+      color:#e5e7eb;
+      font-size:.95rem;
+    }
+
+    .form-control{
+      background-color:var(--card-soft);
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.6);
+      padding:.7rem 1rem;
+      font-size:1rem;
+      color:var(--text);
+    }
+    .form-control::placeholder{
+      color:#9ca3af;
+    }
+    .form-control:focus{
+      background-color:var(--card-soft);
+      border-color:#4ade80;
+      box-shadow:0 0 0 .12rem rgba(74,222,128,.35);
+      color:var(--text);
+    }
+
+    .btn-success{
+      background:linear-gradient(135deg,var(--brand-dark),var(--brand));
+      border:none;
+      border-radius:999px;
+      font-weight:600;
+      padding:.85rem 1.1rem;
+      font-size:1.05rem;
+    }
+    .btn-success:active{
+      background:linear-gradient(135deg,#15803d,#16a34a);
+    }
+
+    .btn-danger{
+      border-radius:999px;
+      font-weight:600;
+      padding:.85rem 1.1rem;
+      font-size:1.05rem;
+    }
+
+    hr{
+      border-color:rgba(148,163,184,.4) !important;
+      margin-top:24px;
+      margin-bottom:24px;
+    }
+
+    #no-device-alert{
+      border-radius:16px;
+      background:rgba(254,243,199,.1);
+      border:1px solid rgba(252,211,77,.5);
+      color:#fed7aa;
+    }
+
+    #message{
+      color:#e2e8f0;
+    }
+
+    #loadingModal .modal-content{
+      background:transparent;
+    }
+    #loadingModal .loader-shell{
+      background:rgba(15,23,42,.96);
+      border-radius:22px;
+      padding:20px 28px;
+      border:1px solid rgba(148,163,184,.6);
+    }
+    input.form-control{min-height:48px;font-size:16px;border-radius:14px;}
+    .btn{min-height:48px;border-radius:14px;font-weight:600;white-space:normal;}
+    @media (max-width: 600px){
+      body{padding:8px 8px calc(14px + env(safe-area-inset-bottom));}
+      .card-main{border-radius:18px;max-width:100%;}
+      .card-header-gradient{padding:14px 16px;}
+      .card-body{padding:16px 14px 18px;}
+      h5#dev-name{font-size:1.15rem;}
+      .small{font-size:.88rem;}
+    }
+  </style>
+</head>
+<body>
+  <div class="card card-main">
+    <div class="card-header-gradient d-flex justify-content-between align-items-center">
+      <div>
+        <div class="liff-badge">
+          <i class="bi bi-chat-right-dots-fill me-1"></i>LINE LIFF
+        </div>
+        <div class="fw-semibold">ยืมคืนอุปกรณ์ IT</div>
+        <div class="small">สแกน QR ผ่าน LINE เพื่อเริ่มใช้งาน</div>
+      </div>
+      <div class="text-end small">
+        <div id="user-name" class="fw-semibold"></div>
+        <div id="user-id" style="opacity:.85;"></div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      <div id="device-block" class="mb-3">
+        <h5 class="fw-semibold mb-1" id="dev-name">กำลังโหลด...</h5>
+        <div class="text-muted small mb-2" id="dev-id"></div>
+        <div id="dev-status"></div>
+      </div>
+
+      <div class="alert alert-warning py-2 px-3 small d-none" id="no-device-alert">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        ไม่พบรหัสอุปกรณ์จากลิงก์ LIFF กรุณาสแกน QR อุปกรณ์อีกครั้ง
+      </div>
+
+      <div id="form-borrow" class="mt-3" style="display:none;">
+        <label class="form-label small fw-semibold">
+          <i class="bi bi-person-badge me-1"></i>ชื่อผู้ยืม
+        </label>
+        <input type="text" class="form-control mb-2" id="borrower"
+              placeholder="ระบุชื่อ และแผนกให้ครบถ้วน">
+        <div class="small text-muted mb-3"><i class="bi bi-clock me-1"></i>ยืมได้ 10 ชั่วโมงต่ออุปกรณ์ และต้องคืนก่อนผู้ใช้อื่นยืมต่อ</div>
+
+        <button class="btn btn-success w-100 py-3" onclick="borrow()">
+          <i class="bi bi-box-arrow-in-right me-1"></i>ยืมอุปกรณ์ผ่าน LINE
+        </button>
+      </div>
+
+      <div id="form-return" class="mt-3" style="display:none;">
+        <div id="returner-wrap" class="mb-3" style="display:none;">
+          <label class="form-label small fw-semibold" for="returner">ยืนยันชื่อผู้ยืมเดิม</label>
+          <input type="text" class="form-control" id="returner" placeholder="กรอกชื่อผู้ยืมเดิม">
+        </div>
+        <button class="btn btn-danger w-100 py-3" onclick="returnDevice()">
+          <i class="bi bi-arrow-return-left me-1"></i>คืนอุปกรณ์ผ่าน LINE
+        </button>
+      </div>
+
+      <hr class="my-3 border-secondary">
+      <div id="message" class="small text-muted"></div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-none">
+        <div class="d-flex justify-content-center">
+          <div class="loader-shell text-center text-white">
+            <div class="spinner-border mb-3" role="status"></div>
+            <div>กำลังประมวลผล...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    const RAW_QUERY = {};
+    const LIFF_ID = '2008359490-qm3K4L5x';
+    // Replace this with the deployed Apps Script Web App URL ending in /exec
+    const API_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_EXEC_URL_HERE';
+
+    let loadingModal;
+    let lineUserId = '';
+    let lineDisplayName = '';
+    let deviceID = '';
+    let liffFinished = false;
+
+    function setMessage(msg) {
+      document.getElementById('message').textContent = msg || '';
+    }
+
+    function showLoading(msg){
+      if (msg) setMessage(msg);
+      if (loadingModal) loadingModal.show();
+    }
+
+    function hideLoading(){
+      try{
+        if (loadingModal) loadingModal.hide();
+      }catch(e){}
+    }
+
+    window.addEventListener('error', function(e){
+      const msg = 'JS Error: ' + (e.message || e.error || e.toString());
+      setMessage(msg);
+      hideLoading();
+      alert(msg);
+    });
+
+    window.addEventListener('unhandledrejection', function(e){
+      const reason = e.reason || {};
+      const msg = 'Promise Error: ' + (reason.message || reason.code || reason.toString());
+      setMessage(msg);
+      hideLoading();
+      alert(msg);
+    });
+
+    function getDeviceFromQuery(){
+      try {
+        if (RAW_QUERY && typeof RAW_QUERY === 'object') {
+          if (RAW_QUERY.device) {
+            return String(RAW_QUERY.device).toUpperCase();
+          }
+          if (RAW_QUERY['liff.state']) {
+            const stateParams = new URLSearchParams(String(RAW_QUERY['liff.state']));
+            const d = stateParams.get('device') || stateParams.get('DEVICE') || '';
+            if (d) return d.toUpperCase();
+          }
+        }
+        const params = new URLSearchParams(location.search || '');
+        const direct = params.get('device');
+        if (direct) return direct.toUpperCase();
+
+        const liffState = params.get('liff.state');
+        if (liffState) {
+          const sp = new URLSearchParams(liffState);
+          const d = sp.get('device') || sp.get('DEVICE') || '';
+          if (d) return d.toUpperCase();
+        }
+      } catch (e) {
+        setMessage('อ่านค่า device จาก URL ไม่ได้: ' + e);
+      }
+      return '';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const modalEl = document.getElementById('loadingModal');
+      loadingModal = new bootstrap.Modal(modalEl, {
+        backdrop:'static',
+        keyboard:false
+      });
+
+      deviceID = getDeviceFromQuery();
+      tryInitLiffWithTimeout();
+    });
+
+    function tryInitLiffWithTimeout(){
+      showLoading('กำลังเชื่อมต่อ LINE LIFF...');
+
+      if (typeof liff === 'undefined') {
+        startAppWithoutLiff('ไม่สามารถโหลด LIFF SDK ได้');
+        return;
+      }
+
+      let timeoutId = setTimeout(() => {
+        if (!liffFinished) {
+          startAppWithoutLiff('การเชื่อมต่อกับ LIFF ช้าผิดปกติ');
+        }
+      }, 15000);
+
+      setMessage('เรียกใช้ liff.init...');
+
+      liff.init({ liffId: LIFF_ID })
+        .then(async () => {
+          if (liffFinished) return;
+          setMessage('เชื่อมต่อ LIFF สำเร็จ กำลังตรวจสอบโปรไฟล์...');
+
+          let profile = null;
+          let ctx = null;
+          let profileError = null;
+          let contextError = null;
+
+          // แยกคำสั่งเพื่อระบุให้ได้ว่าการอ่านโปรไฟล์หรือ Context ล้มเหลว
+          try {
+            if (typeof liff.isLoggedIn === 'function' && !liff.isLoggedIn()) {
+              profileError = new Error('LINE ยังไม่ได้เข้าสู่ระบบ LIFF');
+            } else {
+              profile = await liff.getProfile();
+            }
+          } catch (err) {
+            profileError = err;
+          }
+
+          try {
+            ctx = liff.getContext();
+          } catch (err) {
+            contextError = err;
+          }
+
+          if (liffFinished) return;
+
+          const resolvedDisplayName = (profile && profile.displayName)
+            ? String(profile.displayName).trim()
+            : '';
+          const resolvedUserId = (profile && profile.userId)
+            ? String(profile.userId).trim()
+            : ((ctx && ctx.userId) ? String(ctx.userId).trim() : '');
+
+          lineDisplayName = resolvedDisplayName;
+          lineUserId = resolvedUserId;
+
+          if (lineDisplayName) {
+            document.getElementById('user-name').textContent = lineDisplayName;
+          } else {
+            document.getElementById('user-name').textContent = 'ไม่ได้รับชื่อจาก LINE';
+          }
+          document.getElementById('user-id').textContent =
+            lineUserId ? lineUserId.substring(0, 6) + '…' : '';
+
+          const borrowerInput = document.getElementById('borrower');
+          if (lineDisplayName && borrowerInput && !borrowerInput.value) {
+            borrowerInput.value = lineDisplayName;
+          }
+
+          liffFinished = true;
+          clearTimeout(timeoutId);
+          startApp();
+
+          if (!lineUserId || !lineDisplayName) {
+            const details = [];
+            if (profileError) {
+              details.push('getProfile: ' + (profileError.message || profileError.code || String(profileError)));
+            }
+            if (contextError) {
+              details.push('getContext: ' + (contextError.message || contextError.code || String(contextError)));
+            }
+            if (!details.length) {
+              details.push('LINE ไม่ส่ง User ID หรือ Display Name กลับมา');
+            }
+            setMessage('เปิดใช้งานได้ แต่ดึงโปรไฟล์ LINE ไม่ครบ (' +
+              details.join(' | ') +
+              ') กรุณากรอกชื่อผู้ยืมเอง ระบบจะบันทึกข้อมูล LINE เฉพาะเมื่ออ่านได้');
+          } else {
+            setMessage('ยืนยันโปรไฟล์ LINE สำเร็จ');
+          }
+        })
+        .catch(err => {
+          if (liffFinished) return;
+          clearTimeout(timeoutId);
+          startAppWithoutLiff(
+            'เริ่มต้น LIFF ไม่สำเร็จ: ' +
+            (err && (err.message || err.code) ? (err.message || err.code) : String(err))
+          );
+        });
+    }
+
+    function startAppWithoutLiff(reason){
+      if (liffFinished) return;
+      liffFinished = true;
+      hideLoading();
+      setMessage((reason ? reason + ' — ' : '') +
+        'ยังอ่านโปรไฟล์ LINE ไม่ได้ แต่ยังทำรายการได้โดยกรอกชื่อผู้ยืมเอง ชื่อ LINE จะบันทึกได้เมื่ออนุญาต Scope profile');
+      // Keep the original borrowing workflow usable when LINE profile lookup fails.
+      // Never invent a LINE user ID/display name; use manual borrower name as fallback.
+      startApp();
+    }
+
+    function startApp(){
+      if (!deviceID) {
+        hideLoading();
+        document.getElementById('dev-name').textContent = 'ไม่มีรหัสอุปกรณ์';
+        document.getElementById('no-device-alert').classList.remove('d-none');
+        setMessage('ไม่พบพารามิเตอร์ device ใน URL กรุณาสแกน QR อุปกรณ์อีกครั้ง');
+        return;
+      }
+      loadDevice();
+    }
+
+    function loadDevice(){
+      showLoading('กำลังโหลดข้อมูลอุปกรณ์...');
+
+      apiCall({ action: 'status', deviceID }, res => {
+        if (res && res.ok) renderDevice(res.data);
+        else {
+          hideLoading();
+          document.getElementById('dev-name').textContent = 'เกิดข้อผิดพลาด';
+          setMessage('ไม่สามารถโหลดข้อมูลอุปกรณ์ได้: ' + ((res && res.error) || 'API error'));
+        }
+      });
+    }
+
+    function renderDevice(info){
+      hideLoading();
+
+      if (!info) {
+        document.getElementById('dev-name').textContent = 'ไม่พบอุปกรณ์ในระบบ';
+        document.getElementById('dev-id').textContent   = deviceID;
+        setMessage('ตรวจสอบ DeviceID ในชีต Devices อีกครั้ง');
+        return;
+      }
+
+      document.getElementById('dev-name').textContent =
+        info.Name || '(ไม่มีชื่ออุปกรณ์)';
+      document.getElementById('dev-id').textContent =
+        `รหัส: ${info.DeviceID} • หมวด: ${info.Category || '-'}`;
+
+      const statusDiv = document.getElementById('dev-status');
+      statusDiv.innerHTML = '';
+
+      const pill = document.createElement('div');
+      let cls = 'status-pill ';
+      let icon = '';
+
+      if (info.IsOverdue) {
+        cls += 'status-over';
+        pill.textContent = 'เกินกำหนดคืน';
+        icon = '<i class="bi bi-exclamation-octagon-fill me-1"></i>';
+      } else if (info.Status === 'Borrowed') {
+        cls += 'status-bor';
+        pill.textContent = 'ถูกยืมอยู่';
+        icon = '<i class="bi bi-lock-fill me-1"></i>';
+      } else {
+        cls += 'status-ava';
+        pill.textContent = 'พร้อมให้ยืม';
+        icon = '<i class="bi bi-unlock-fill me-1"></i>';
+      }
+
+      pill.className = cls;
+      pill.innerHTML = icon + pill.textContent;
+      statusDiv.appendChild(pill);
+
+      const formBorrow = document.getElementById('form-borrow');
+      const formReturn = document.getElementById('form-return');
+      let ownershipMessage = '';
+
+      if (info.Status === 'Available') {
+        formBorrow.style.display = 'block';
+        formReturn.style.display = 'none';
+      } else {
+        formBorrow.style.display = 'none';
+        formReturn.style.display = 'block';
+      }
+
+      const msg = [];
+      if (info.CurrentUser) msg.push(`ผู้ยืม: ${info.CurrentUser}`);
+      if (info.BorrowedAt) msg.push(`วันที่ยืม: ${formatDate(info.BorrowedAt)}`);
+      if (info.DueAt)      msg.push(`กำหนดคืน: ${formatDate(info.DueAt)}`);
+      if (ownershipMessage) msg.push(ownershipMessage);
+      setMessage(msg.join(' | '));
+    }
+
+    function borrow(){
+      const nameInput = document.getElementById('borrower').value.trim();
+
+      // ถ้าไม่กรอก → ใช้ชื่อจาก LINE
+      const nameBase  = nameInput || lineDisplayName;
+
+      if (!deviceID) {
+        alert('ไม่มีรหัสอุปกรณ์');
+        return;
+      }
+
+      // Profile is optional for the transaction so a LIFF profile-scope/configuration
+      // issue does not disable borrowing. Prefer LINE display name when available;
+      // otherwise use the required manually-entered borrower name. Empty LINE fields
+      // are passed explicitly and never fabricated.
+      if (!nameBase) {
+        alert('กรุณาระบุชื่อผู้ยืมในช่องชื่อผู้ยืม');
+        document.getElementById('borrower').focus();
+        return;
+      }
+      const name = nameBase;
+
+      showLoading('กำลังบันทึกการยืม...');
+
+      apiCall({
+        action: 'borrow',
+        deviceID, userName: name, lineUserId, lineDisplayName
+      }, res => {
+        hideLoading();
+        if (!res || !res.ok) { alert((res && res.error) || 'ยืมไม่สำเร็จ'); return; }
+        alert(res.data.message || 'ยืมสำเร็จ');
+        if (res.data && res.data.newInfo) renderDevice(res.data.newInfo);
+        else loadDevice();
+      });
+    }
+
+    function returnDevice(){
+      const returner = document.getElementById('returner').value.trim();
+      if (!lineUserId && !returner) { alert('กรุณายืนยันชื่อผู้ยืมเดิม'); return; }
+      if (!deviceID) {
+        alert('ไม่มีรหัสอุปกรณ์');
+        return;
+      }
+
+      showLoading('กำลังบันทึกการคืน...');
+
+      apiCall({
+        action: 'return',
+        deviceID,
+        userName: returner || lineDisplayName || '',
+        lineUserId,
+        lineDisplayName
+      }, res => {
+        hideLoading();
+        if (!res || !res.ok) { alert((res && res.error) || 'คืนไม่สำเร็จ'); return; }
+        alert(res.data.message || 'คืนสำเร็จ');
+        if (res.data && res.data.newInfo) renderDevice(res.data.newInfo);
+        else loadDevice();
+      });
+    }
+
+    function apiCall(params, done) {
+      if (!API_URL || API_URL.includes('PASTE_YOUR_')) {
+        hideLoading();
+        setMessage('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ index.html');
+        return;
+      }
+      const callbackName = '__borrowPdaCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+      const script = document.createElement('script');
+      const payload = Object.assign({}, params, { callback: callbackName });
+      const query = Object.keys(payload).map(k =>
+        encodeURIComponent(k) + '=' + encodeURIComponent(String(payload[k] == null ? '' : payload[k]))
+      ).join('&');
+      let finished = false;
+      const timer = setTimeout(() => {
+        if (finished) return;
+        finished = true;
+        cleanup();
+        hideLoading();
+        setMessage('API ไม่ตอบกลับภายใน 25 วินาที กรุณาตรวจ API_URL และ Deployment');
+      }, 25000);
+      function cleanup() {
+        clearTimeout(timer);
+        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+      window[callbackName] = result => {
+        if (finished) return;
+        finished = true;
+        cleanup();
+        done(result);
+      };
+      script.onerror = () => {
+        if (finished) return;
+        finished = true;
+        cleanup();
+        hideLoading();
+        setMessage('เรียก Apps Script API ไม่สำเร็จ กรุณาตรวจ URL และการ Deploy');
+      };
+      script.src = API_URL + (API_URL.includes('?') ? '&' : '?') + query;
+      document.head.appendChild(script);
+    }
+
+    function formatDate(d){
+      try{
+        return new Date(d).toLocaleString('th-TH');
+      }catch(e){
+        return d;
+      }
+    }
+  </script>
+</body>
+</html>
