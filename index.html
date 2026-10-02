@@ -184,9 +184,13 @@
         <div class="fw-semibold">ยืมคืนอุปกรณ์ IT</div>
         <div class="small">สแกน QR ผ่าน LINE เพื่อเริ่มใช้งาน</div>
       </div>
-      <div class="text-end small">
-        <div id="user-name" class="fw-semibold"></div>
-        <div id="user-id" style="opacity:.85;"></div>
+      <div class="d-flex align-items-center gap-2 text-end small">
+        <div>
+          <div id="user-name" class="fw-semibold"></div>
+          <div id="user-id" style="opacity:.85;"></div>
+        </div>
+        <img id="user-picture" alt="รูปโปรไฟล์ LINE" src="" width="42" height="42"
+             style="display:none;object-fit:cover;border-radius:50%;border:2px solid rgba(255,255,255,.75);background:#e5e7eb;" />
       </div>
     </div>
 
@@ -254,6 +258,7 @@
     let loadingModal;
     let lineUserId = '';
     let lineDisplayName = '';
+    let linePictureUrl = '';
     let deviceID = '';
     let liffFinished = false;
 
@@ -380,6 +385,13 @@
 
           lineDisplayName = resolvedDisplayName;
           lineUserId = resolvedUserId;
+          linePictureUrl = (profile && profile.pictureUrl) ? String(profile.pictureUrl) : '';
+          const pictureEl = document.getElementById('user-picture');
+          if (linePictureUrl && pictureEl) {
+            pictureEl.src = linePictureUrl;
+            pictureEl.style.display = 'block';
+            pictureEl.onerror = () => { pictureEl.style.display = 'none'; };
+          }
 
           if (lineDisplayName) {
             document.getElementById('user-name').textContent = lineDisplayName;
@@ -547,7 +559,7 @@
 
       apiCall({
         action: 'borrow',
-        deviceID, userName: name, lineUserId, lineDisplayName
+        deviceID, userName: name, lineUserId, lineDisplayName, linePictureUrl
       }, res => {
         hideLoading();
         if (!res || !res.ok) { alert((res && res.error) || 'ยืมไม่สำเร็จ'); return; }
@@ -572,7 +584,8 @@
         deviceID,
         userName: returner || lineDisplayName || '',
         lineUserId,
-        lineDisplayName
+        lineDisplayName,
+        linePictureUrl
       }, res => {
         hideLoading();
         if (!res || !res.ok) { alert((res && res.error) || 'คืนไม่สำเร็จ'); return; }
@@ -588,73 +601,39 @@
         setMessage('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ index.html');
         return;
       }
-
-      // JSONP is used because this page is hosted on GitHub Pages while the API is GAS.
-      // Add a cache-buster and show a clear error if GAS never calls the callback.
       const callbackName = '__borrowPdaCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
       const script = document.createElement('script');
-      const payload = Object.assign({}, params, {
-        callback: callbackName,
-        _ts: Date.now()
-      });
+      const payload = Object.assign({}, params, { callback: callbackName });
       const query = Object.keys(payload).map(k =>
         encodeURIComponent(k) + '=' + encodeURIComponent(String(payload[k] == null ? '' : payload[k]))
       ).join('&');
-      const requestUrl = API_URL + (API_URL.includes('?') ? '&' : '?') + query;
       let finished = false;
-      let callbackReceived = false;
-
-      function cleanup() {
-        clearTimeout(timer);
-        script.onload = null;
-        script.onerror = null;
-        if (script.parentNode) script.parentNode.removeChild(script);
-        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
-      }
-
       const timer = setTimeout(() => {
         if (finished) return;
         finished = true;
         cleanup();
         hideLoading();
-        setMessage('หมดเวลารอ GAS API (25 วินาที) — คำขอ: ' + (params.action || 'ไม่ระบุ') +
-          ', อุปกรณ์: ' + (params.deviceID || '-') +
-          '. เปิด URL API ทดสอบในเบราว์เซอร์เพื่อตรวจ Deployment');
+        setMessage('API ไม่ตอบกลับภายใน 25 วินาที กรุณาตรวจ API_URL และ Deployment');
       }, 25000);
-
+      function cleanup() {
+        clearTimeout(timer);
+        try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
       window[callbackName] = result => {
         if (finished) return;
-        callbackReceived = true;
         finished = true;
         cleanup();
-        if (!result || typeof result !== 'object') {
-          hideLoading();
-          setMessage('GAS ส่งข้อมูลกลับมาในรูปแบบที่ไม่ถูกต้อง');
-          return;
-        }
         done(result);
       };
-
-      script.async = true;
       script.onerror = () => {
         if (finished) return;
         finished = true;
         cleanup();
         hideLoading();
-        setMessage('โหลดสคริปต์จาก GAS ไม่สำเร็จ ตรวจสอบ URL และการ Deploy');
+        setMessage('เรียก Apps Script API ไม่สำเร็จ กรุณาตรวจ URL และการ Deploy');
       };
-      // A script can load successfully but still fail to call our callback.
-      script.onload = () => {
-        if (finished || callbackReceived) return;
-        setTimeout(() => {
-          if (finished || callbackReceived) return;
-          finished = true;
-          cleanup();
-          hideLoading();
-          setMessage('GAS โหลดสคริปต์แล้วแต่ไม่เรียก JSONP callback กรุณาตรวจ action/callback ใน Code.gs');
-        }, 1200);
-      };
-      script.src = requestUrl;
+      script.src = API_URL + (API_URL.includes('?') ? '&' : '?') + query;
       document.head.appendChild(script);
     }
 
