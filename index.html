@@ -259,6 +259,15 @@
     #message{color:#5c6f8b!important;line-height:1.55;overflow-wrap:anywhere;}
     #loadingModal .loader-shell{background:rgba(255,255,255,.96);color:#17345c!important;border:1px solid rgba(155,186,226,.45);box-shadow:0 20px 55px rgba(35,75,125,.18);backdrop-filter:blur(18px);}
     #loadingModal .spinner-border{color:#0788f9!important;}
+    #noticeModal .modal-content{border:1px solid rgba(155,186,226,.45);border-radius:24px;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);box-shadow:0 22px 60px rgba(35,75,125,.22);overflow:hidden;}
+    #noticeModal .notice-icon{width:54px;height:54px;border-radius:18px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.55rem;}
+    #noticeModal .notice-icon.info{background:#e3f2ff;color:#0878e3;}
+    #noticeModal .notice-icon.success{background:#dcfce9;color:#078044;}
+    #noticeModal .notice-icon.error{background:#ffe5e9;color:#c22540;}
+    #noticeModal .notice-icon.warning{background:#fff2d6;color:#9b6100;}
+    #noticeModal .modal-title{color:#17345c;font-weight:750;}
+    #noticeModal .modal-body{color:#60718e;white-space:pre-line;overflow-wrap:anywhere;}
+    #noticeModal .btn{min-height:46px;border-radius:14px;}
     @media(max-width:600px){
       body{padding:8px 8px calc(14px + env(safe-area-inset-bottom));}
       .card-main{border-radius:23px;}
@@ -333,6 +342,19 @@
     </div>
   </div>
 
+  <div class="modal fade" id="noticeModal" tabindex="-1" aria-labelledby="noticeTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-body text-center p-4">
+          <div id="noticeIcon" class="notice-icon info"><i class="bi bi-info-circle-fill"></i></div>
+          <h5 id="noticeTitle" class="modal-title mb-2">แจ้งให้ทราบ</h5>
+          <div id="noticeText" class="modal-body p-0 mb-4">รายละเอียด</div>
+          <button type="button" id="noticeOk" class="btn btn-primary w-100" data-bs-dismiss="modal">ตกลง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-none">
@@ -355,6 +377,7 @@
     const API_URL = 'https://script.google.com/macros/s/AKfycbzkgWzwmv768EfzxMhZU-TzuLrMCx73zJOByDFDFcnzbbLJsOaCNkaHzVcxbncB_-b2/exec?api=borrowPda';
 
     let loadingModal;
+    let noticeModal;
     let lineUserId = '';
     let lineDisplayName = '';
     let linePictureUrl = '';
@@ -363,6 +386,24 @@
 
     function setMessage(msg) {
       document.getElementById('message').textContent = msg || '';
+    }
+
+    function showNotice(message, type = 'info', title) {
+      const config = {
+        success: { title: 'ดำเนินการสำเร็จ', icon: 'bi-check-circle-fill', button: 'btn-success' },
+        error:   { title: 'ไม่สามารถดำเนินการได้', icon: 'bi-x-circle-fill', button: 'btn-danger' },
+        warning:{ title: 'กรุณาตรวจสอบ', icon: 'bi-exclamation-triangle-fill', button: 'btn-warning' },
+        info:    { title: 'แจ้งให้ทราบ', icon: 'bi-info-circle-fill', button: 'btn-primary' }
+      };
+      const item = config[type] || config.info;
+      document.getElementById('noticeTitle').textContent = title || item.title;
+      document.getElementById('noticeText').textContent = String(message || '');
+      const icon = document.getElementById('noticeIcon');
+      icon.className = 'notice-icon ' + (config[type] ? type : 'info');
+      icon.innerHTML = '<i class="bi ' + item.icon + '"></i>';
+      const button = document.getElementById('noticeOk');
+      button.className = 'btn w-100 ' + item.button;
+      if (noticeModal) noticeModal.show();
     }
 
     function showLoading(msg){
@@ -380,7 +421,7 @@
       const msg = 'JS Error: ' + (e.message || e.error || e.toString());
       setMessage(msg);
       hideLoading();
-      alert(msg);
+      showNotice(msg, 'error', 'เกิดข้อผิดพลาด');
     });
 
     window.addEventListener('unhandledrejection', function(e){
@@ -388,7 +429,7 @@
       const msg = 'Promise Error: ' + (reason.message || reason.code || reason.toString());
       setMessage(msg);
       hideLoading();
-      alert(msg);
+      showNotice(msg, 'error', 'เกิดข้อผิดพลาด');
     });
 
     function getDeviceFromQuery(){
@@ -424,6 +465,10 @@
       loadingModal = new bootstrap.Modal(modalEl, {
         backdrop:'static',
         keyboard:false
+      });
+      noticeModal = new bootstrap.Modal(document.getElementById('noticeModal'), {
+        backdrop: true,
+        keyboard: true
       });
 
       deviceID = getDeviceFromQuery();
@@ -639,7 +684,7 @@
       const nameBase  = nameInput || lineDisplayName;
 
       if (!deviceID) {
-        alert('ไม่มีรหัสอุปกรณ์');
+        showNotice('ไม่มีรหัสอุปกรณ์ กรุณาสแกน QR ของอุปกรณ์อีกครั้ง', 'warning');
         return;
       }
 
@@ -648,7 +693,7 @@
       // otherwise use the required manually-entered borrower name. Empty LINE fields
       // are passed explicitly and never fabricated.
       if (!nameBase) {
-        alert('กรุณาระบุชื่อผู้ยืมในช่องชื่อผู้ยืม');
+        showNotice('กรุณาระบุชื่อผู้ยืมในช่องชื่อผู้ยืม', 'warning');
         document.getElementById('borrower').focus();
         return;
       }
@@ -661,8 +706,8 @@
         deviceID, userName: name, lineUserId, lineDisplayName, linePictureUrl
       }, res => {
         hideLoading();
-        if (!res || !res.ok) { alert((res && res.error) || 'ยืมไม่สำเร็จ'); return; }
-        alert(res.data.message || 'ยืมสำเร็จ');
+        if (!res || !res.ok) { showNotice((res && res.error) || 'ยืมไม่สำเร็จ', 'error'); return; }
+        showNotice(res.data.message || 'ยืมสำเร็จ', 'success');
         if (res.data && res.data.newInfo) renderDevice(res.data.newInfo);
         else loadDevice();
       });
@@ -670,9 +715,9 @@
 
     function returnDevice(){
       const returner = document.getElementById('returner').value.trim();
-      if (!lineUserId && !returner) { alert('กรุณายืนยันชื่อผู้ยืมเดิม'); return; }
+      if (!lineUserId && !returner) { showNotice('กรุณายืนยันชื่อผู้ยืมเดิม', 'warning'); return; }
       if (!deviceID) {
-        alert('ไม่มีรหัสอุปกรณ์');
+        showNotice('ไม่มีรหัสอุปกรณ์ กรุณาสแกน QR ของอุปกรณ์อีกครั้ง', 'warning');
         return;
       }
 
@@ -687,8 +732,8 @@
         linePictureUrl
       }, res => {
         hideLoading();
-        if (!res || !res.ok) { alert((res && res.error) || 'คืนไม่สำเร็จ'); return; }
-        alert(res.data.message || 'คืนสำเร็จ');
+        if (!res || !res.ok) { showNotice((res && res.error) || 'คืนไม่สำเร็จ', 'error'); return; }
+        showNotice(res.data.message || 'คืนสำเร็จ', 'success');
         if (res.data && res.data.newInfo) renderDevice(res.data.newInfo);
         else loadDevice();
       });
