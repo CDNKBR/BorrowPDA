@@ -172,6 +172,104 @@
       h5#dev-name{font-size:1.15rem;}
       .small{font-size:.88rem;}
     }
+
+
+    /* ===== BorrowPDA Re-Design: Option 3 - Light Glass ===== */
+    :root{
+      --bg:#eaf3ff;
+      --layer:#f8fbff;
+      --card:rgba(255,255,255,.82);
+      --card-soft:rgba(245,249,255,.92);
+      --brand:#0788f9;
+      --brand-dark:#0875df;
+      --text:#14213d;
+      --muted:#60718e;
+      --border:rgba(125,157,202,.24);
+    }
+    html{min-height:100%;background:#eaf3ff;}
+    body{
+      color:var(--text);
+      background:
+        radial-gradient(ellipse at 8% 2%,rgba(80,166,255,.24),transparent 35%),
+        radial-gradient(ellipse at 95% 20%,rgba(129,194,255,.30),transparent 36%),
+        linear-gradient(180deg,#e8f2ff 0%,#f6f9ff 55%,#eaf2ff 100%);
+      padding:12px 10px calc(20px + env(safe-area-inset-bottom));
+    }
+    .card-main{
+      border:1px solid rgba(255,255,255,.92);
+      background:rgba(255,255,255,.66);
+      box-shadow:0 18px 50px rgba(43,91,150,.14),0 2px 10px rgba(43,91,150,.07),inset 0 1px 0 rgba(255,255,255,.9);
+      backdrop-filter:blur(22px) saturate(145%);
+      -webkit-backdrop-filter:blur(22px) saturate(145%);
+    }
+    .card-header-gradient{
+      color:#10284b;
+      background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(229,242,255,.88));
+      border-bottom:1px solid rgba(130,170,220,.22);
+      padding:20px 22px;
+    }
+    .card-header-gradient .small{color:#617795!important;}
+    .liff-badge{color:#087ce5;letter-spacing:.13em;font-weight:700;}
+    .card-header-gradient .fw-semibold{color:#10284b;}
+    #user-picture{
+      border:2px solid rgba(255,255,255,.98)!important;
+      box-shadow:0 3px 12px rgba(30,83,145,.2);
+    }
+    .card-body{
+      color:#152746;
+      background:linear-gradient(160deg,rgba(255,255,255,.86),rgba(246,250,255,.93));
+      padding:22px 20px 24px;
+    }
+    h5#dev-name{color:#142b4d;font-size:1.35rem;font-weight:700;letter-spacing:-.015em;}
+    .text-muted{color:#60718e!important;}
+    #dev-id{color:#60718e!important;}
+    #device-block{
+      padding:17px 16px 16px;
+      margin-left:-2px;margin-right:-2px;
+      border:1px solid rgba(150,180,220,.25);
+      border-radius:20px;
+      background:linear-gradient(135deg,rgba(255,255,255,.88),rgba(239,247,255,.76));
+      box-shadow:0 6px 18px rgba(52,99,157,.06),inset 0 1px 0 rgba(255,255,255,.95);
+    }
+    .status-pill{padding:.42rem .88rem;font-size:.88rem;box-shadow:inset 0 1px 0 rgba(255,255,255,.55);}
+    .status-ava{background:#d8fbe7;color:#087a45;border:1px solid #b9f0d0;}
+    .status-bor{background:#fff0d7;color:#9b5b00;border:1px solid #ffe0a7;}
+    .status-over{background:#ffe1e5;color:#b42338;border:1px solid #ffc4cd;}
+    .form-label{color:#203655;font-weight:600;}
+    .form-control{
+      color:#172b49;background:rgba(255,255,255,.88);border:1px solid rgba(139,166,205,.38);
+      border-radius:15px;padding:.78rem 1rem;box-shadow:0 2px 8px rgba(38,80,130,.035);
+    }
+    .form-control::placeholder{color:#8a9bb4;}
+    .form-control:focus{color:#172b49;background:#fff;border-color:#65b4ff;box-shadow:0 0 0 .2rem rgba(28,139,245,.13);}
+    .btn{min-height:52px;border-radius:16px;font-weight:700;letter-spacing:.005em;transition:transform .15s ease,box-shadow .15s ease;}
+    .btn:active{transform:scale(.99);}
+    .btn-success{
+      color:#fff;background:linear-gradient(135deg,#0788f9,#00b7a4);border:0;
+      box-shadow:0 8px 18px rgba(0,139,226,.20),inset 0 1px 0 rgba(255,255,255,.22);
+    }
+    .btn-success:hover,.btn-success:focus{color:#fff;background:linear-gradient(135deg,#0878e3,#009f91);box-shadow:0 10px 22px rgba(0,139,226,.25);}
+    .btn-danger{
+      color:#fff;background:linear-gradient(135deg,#087ff0,#1767dc);border:0;
+      box-shadow:0 8px 18px rgba(22,105,220,.20),inset 0 1px 0 rgba(255,255,255,.22);
+    }
+    .btn-danger:hover,.btn-danger:focus{color:#fff;background:linear-gradient(135deg,#086ed1,#155ac4);}
+    hr{border-color:rgba(137,164,202,.28)!important;opacity:1;}
+    #no-device-alert{border-radius:16px;background:rgba(255,247,224,.9);border:1px solid #f6d88c;color:#865900;}
+    #message{color:#5c6f8b!important;line-height:1.55;overflow-wrap:anywhere;}
+    #loadingModal .loader-shell{background:rgba(255,255,255,.96);color:#17345c!important;border:1px solid rgba(155,186,226,.45);box-shadow:0 20px 55px rgba(35,75,125,.18);backdrop-filter:blur(18px);}
+    #loadingModal .spinner-border{color:#0788f9!important;}
+    @media(max-width:600px){
+      body{padding:8px 8px calc(14px + env(safe-area-inset-bottom));}
+      .card-main{border-radius:23px;}
+      .card-header-gradient{padding:17px 16px;}
+      .card-body{padding:17px 14px 20px;}
+      #device-block{padding:16px 14px;border-radius:18px;}
+      h5#dev-name{font-size:1.22rem;}
+      .btn{min-height:54px;}
+    }
+    @media(prefers-reduced-motion:reduce){.btn{transition:none;}}
+
   </style>
 </head>
 <body>
@@ -181,8 +279,9 @@
         <div class="liff-badge">
           <i class="bi bi-chat-right-dots-fill me-1"></i>LINE LIFF
         </div>
-        <div class="fw-semibold">ยืมคืนอุปกรณ์ IT</div>
-        <div class="small">สแกน QR ผ่าน LINE เพื่อเริ่มใช้งาน</div>
+        <div class="fw-semibold"><i class="bi bi-box-seam-fill me-1" style="color:#0788f9"></i>BorrowPDA</div>
+        <div class="small">IT Equipment • ระบบยืม–คืนอุปกรณ์</div>
+        
       </div>
       <div class="d-flex align-items-center gap-2 text-end small">
         <div>
