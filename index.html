@@ -752,7 +752,7 @@
         setMessage('ยังไม่ได้ตั้งค่า API_URL ในไฟล์ index.html');
         return;
       }
-      const callbackName = '__borrowPdaCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+      const callbackName = 'borrowPdaCb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
       const script = document.createElement('script');
       const payload = Object.assign({}, params, { callback: callbackName });
       const query = Object.keys(payload).map(k =>
@@ -782,7 +782,14 @@
         finished = true;
         cleanup();
         hideLoading();
-        setMessage('เรียก Apps Script API ไม่สำเร็จ กรุณาตรวจ URL และการ Deploy');
+        setMessage('เรียก Apps Script API ไม่สำเร็จ (script.onerror) กรุณาตรวจ URL และการ Deploy');
+      };
+      script.onload = () => {
+        // If the script loaded but never called the JSONP callback, the endpoint
+        // likely rejected/ignored the callback parameter or returned non-JSONP content.
+        if (!finished) {
+          setMessage('โหลด API script แล้ว แต่ไม่ได้เรียก JSONP callback; ตรวจชื่อ callback และรูปแบบการตอบกลับของ Apps Script');
+        }
       };
       script.src = API_URL + (API_URL.includes('?') ? '&' : '?') + query;
       document.head.appendChild(script);
