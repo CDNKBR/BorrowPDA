@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <title>LIFF ยืมคืนอุปกรณ์ IT</title>
+  <!-- BorrowPDA LIFF Modal hotfix: 2026-10-02 -->
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -405,6 +406,12 @@
       button.className = 'btn w-100 ' + item.button;
       if (noticeModal) noticeModal.show();
     }
+
+    // Convert any remaining native browser alert() calls to the in-page Bootstrap Modal.
+    // This also protects against legacy validation code that still calls alert().
+    window.alert = function(message) {
+      showNotice(String(message == null ? '' : message), 'warning');
+    };
 
     function showLoading(msg){
       if (msg) setMessage(msg);
