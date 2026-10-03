@@ -175,6 +175,64 @@
     }
 
 
+
+    /* BorrowPDA LIFF polish: compact Light Glass + personal history */
+    body{
+      background:
+        radial-gradient(ellipse at 5% 0%,rgba(59,160,255,.20),transparent 34%),
+        radial-gradient(ellipse at 96% 12%,rgba(45,212,191,.13),transparent 30%),
+        linear-gradient(180deg,#edf5ff 0%,#f8fbff 48%,#edf4ff 100%);
+      padding:14px 12px calc(24px + env(safe-area-inset-bottom));
+    }
+    .card-main{max-width:560px;border-radius:26px}
+    .card-header-gradient{padding:21px 23px}
+    .card-body{padding:22px 22px 25px}
+    #device-block{border-radius:22px;padding:20px 19px;margin:0 0 22px}
+    h5#dev-name{font-size:1.5rem;letter-spacing:-.025em}
+    #dev-id{font-size:.95rem;line-height:1.55}
+    .form-label{display:flex;align-items:center;gap:.45rem;margin-bottom:8px;font-size:.96rem}
+    .form-control,.form-select{
+      min-height:52px;border-radius:15px;padding:.78rem 1rem;
+      border:1px solid #d6e2f2;background:rgba(255,255,255,.94);
+      color:#172b49;box-shadow:0 3px 10px rgba(32,73,126,.035);
+    }
+    .form-control:focus,.form-select:focus{
+      border-color:#78baff;background:#fff;box-shadow:0 0 0 .22rem rgba(25,135,245,.12)
+    }
+    .btn{min-height:52px;border-radius:15px}
+    .btn-success{background:linear-gradient(115deg,#1688f8,#00b7a4);box-shadow:0 9px 20px rgba(0,139,226,.18)}
+    .btn-danger{background:linear-gradient(115deg,#ef476f,#e63946);border:0}
+    .section-kicker{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#7290b6}
+    .history-panel{
+      margin-top:22px;padding:17px;border:1px solid rgba(154,181,218,.32);
+      border-radius:21px;background:rgba(255,255,255,.76);
+      box-shadow:0 8px 24px rgba(42,80,130,.055)
+    }
+    .history-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .history-refresh{min-height:36px;padding:6px 11px;border-radius:11px;font-size:.82rem}
+    .history-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:12px}
+    .history-stat{border-radius:13px;padding:10px 12px;background:#f3f8ff;border:1px solid #e5eefb}
+    .history-stat strong{display:block;font-size:1.12rem;color:#183b69}
+    .history-stat span{font-size:.78rem;color:#6b7f9c}
+    .history-list{display:flex;flex-direction:column;gap:9px}
+    .history-item{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;padding:11px;border-radius:14px;background:#fff;border:1px solid #e8eff8}
+    .history-icon{width:36px;height:36px;border-radius:12px;display:grid;place-items:center}
+    .history-icon.borrow{background:#e0f2fe;color:#0369a1}
+    .history-icon.return{background:#dcfce7;color:#15803d}
+    .history-title{font-weight:700;color:#183153;font-size:.92rem;line-height:1.35}
+    .history-meta{font-size:.78rem;color:#71839d;line-height:1.5;margin-top:3px;overflow-wrap:anywhere}
+    .history-note{display:inline-block;margin-top:5px;padding:3px 8px;border-radius:999px;background:#eff6ff;color:#315b8f;font-size:.76rem}
+    .history-empty{padding:20px 10px;text-align:center;color:#71839d;font-size:.88rem}
+    .history-loading{opacity:.65}
+    @media(max-width:600px){
+      body{padding:9px 8px calc(18px + env(safe-area-inset-bottom))}
+      .card-main{border-radius:22px}
+      .card-header-gradient{padding:17px 17px}
+      .card-body{padding:17px 15px 20px}
+      #device-block{padding:17px 15px;margin-bottom:19px}
+      .history-panel{padding:14px}
+    }
+
     /* ===== BorrowPDA Re-Design: Option 3 - Light Glass ===== */
     :root{
       --bg:#eaf3ff;
@@ -346,6 +404,22 @@
 
       <hr class="my-3 border-secondary">
       <div id="message" class="small text-muted"></div>
+
+      <section id="user-history" class="history-panel" aria-labelledby="history-heading">
+        <div class="history-toolbar">
+          <div>
+            <div class="section-kicker">Personal activity</div>
+            <div id="history-heading" class="fw-bold"><i class="bi bi-clock-history me-1"></i>ประวัติยืม–คืนของฉัน</div>
+          </div>
+          <button type="button" class="btn btn-outline-primary history-refresh" id="history-refresh" onclick="loadUserHistory()">
+            <i class="bi bi-arrow-clockwise me-1"></i>รีเฟรช
+          </button>
+        </div>
+        <div id="history-summary" class="history-summary" style="display:none"></div>
+        <div id="history-list" class="history-list">
+          <div class="history-empty"><i class="bi bi-person-check me-1"></i>กำลังตรวจสอบบัญชี LINE...</div>
+        </div>
+      </section>
     </div>
   </div>
 
@@ -616,6 +690,7 @@
       }
       loadDepartments();
       loadDevice();
+      loadUserHistory();
     }
 
     function loadDepartments(){
@@ -752,6 +827,7 @@
         showNotice(res.data.message || 'ยืมสำเร็จ', 'success');
         if (res.data && res.data.newInfo) renderDevice(res.data.newInfo);
         else loadDevice();
+        loadUserHistory();
       });
     }
 
@@ -778,6 +854,85 @@
         showNotice(res.data.message || 'คืนสำเร็จ', 'success');
         if (res.data && res.data.newInfo) renderDevice(res.data.newInfo);
         else loadDevice();
+        loadUserHistory();
+      });
+    }
+
+    function loadUserHistory(){
+      const list = document.getElementById('history-list');
+      const summary = document.getElementById('history-summary');
+      const button = document.getElementById('history-refresh');
+      if (!list) return;
+
+      if (!lineUserId) {
+        list.innerHTML = '<div class="history-empty"><i class="bi bi-info-circle me-1"></i>กรุณาเปิดผ่าน LINE และอนุญาตให้ระบบอ่านโปรไฟล์ เพื่อดูประวัติส่วนตัว</div>';
+        if (summary) summary.style.display = 'none';
+        return;
+      }
+
+      if (button) button.disabled = true;
+      list.classList.add('history-loading');
+      list.innerHTML = '<div class="history-empty"><span class="spinner-border spinner-border-sm me-2"></span>กำลังโหลดประวัติของคุณ...</div>';
+
+      apiCall({ action: 'userHistory', lineUserId }, res => {
+        if (button) button.disabled = false;
+        list.classList.remove('history-loading');
+
+        if (!res || !res.ok || !Array.isArray(res.data)) {
+          list.innerHTML = '<div class="history-empty">โหลดประวัติไม่สำเร็จ กรุณากดรีเฟรชอีกครั้ง</div>';
+          if (summary) summary.style.display = 'none';
+          return;
+        }
+
+        const items = res.data;
+        const borrowed = items.filter(x => String(x.Action || '').toLowerCase() === 'borrow').length;
+        const returned = items.filter(x => String(x.Action || '').toLowerCase() === 'return').length;
+
+        if (summary) {
+          summary.innerHTML =
+            '<div class="history-stat"><strong>' + borrowed + '</strong><span><i class="bi bi-box-arrow-up-right me-1"></i>รายการยืม</span></div>' +
+            '<div class="history-stat"><strong>' + returned + '</strong><span><i class="bi bi-box-arrow-in-left me-1"></i>รายการคืน</span></div>';
+          summary.style.display = 'grid';
+        }
+
+        if (!items.length) {
+          list.innerHTML = '<div class="history-empty"><i class="bi bi-journal-text fs-4 d-block mb-2"></i>ยังไม่พบประวัติยืม–คืนของบัญชี LINE นี้</div>';
+          return;
+        }
+
+        list.innerHTML = '';
+        items.forEach(item => {
+          const isBorrow = String(item.Action || '').toLowerCase() === 'borrow';
+          const row = document.createElement('article');
+          row.className = 'history-item';
+
+          const icon = document.createElement('div');
+          icon.className = 'history-icon ' + (isBorrow ? 'borrow' : 'return');
+          icon.innerHTML = '<i class="bi ' + (isBorrow ? 'bi-box-arrow-up-right' : 'bi-box-arrow-in-left') + '"></i>';
+
+          const body = document.createElement('div');
+          const title = document.createElement('div');
+          title.className = 'history-title';
+          title.textContent = (isBorrow ? 'ยืมอุปกรณ์' : 'คืนอุปกรณ์') + ' • ' + (item.DeviceID || '-');
+
+          const meta = document.createElement('div');
+          meta.className = 'history-meta';
+          meta.textContent = (item.Timestamp || '-') + (item.UserName ? ' · ' + item.UserName : '') +
+            (item.BorrowedAt ? ' · เริ่มยืม ' + item.BorrowedAt : '') +
+            (item.DueAt && isBorrow ? ' · กำหนดคืน ' + item.DueAt : '');
+
+          body.appendChild(title);
+          body.appendChild(meta);
+          if (item.Note) {
+            const note = document.createElement('div');
+            note.className = 'history-note';
+            note.textContent = 'แผนก: ' + item.Note;
+            body.appendChild(note);
+          }
+          row.appendChild(icon);
+          row.appendChild(body);
+          list.appendChild(row);
+        });
       });
     }
 
