@@ -870,6 +870,7 @@
         return;
       }
       loadDepartments();
+      loadUserProfile();
       loadDevice();
       loadUserHistory();
     }
@@ -892,6 +893,32 @@
           select.appendChild(option);
         });
         if (!departments.length) select.innerHTML = '<option value="">ไม่พบข้อมูลแผนกใน Config</option>';
+      });
+    }
+
+    function loadUserProfile(){
+      if (!lineUserId) return;
+      apiCall({ action: 'userprofile', lineUserId }, res => {
+        if (!res || !res.ok || !res.data) return;
+        const profile = res.data;
+        const select = document.getElementById('department');
+        if (profile.registered && profile.Dept && select) {
+          const applySavedDepartment = () => {
+            const found = Array.from(select.options).some(option => option.value === profile.Dept);
+            if (found) select.value = profile.Dept;
+            syncProfilePanel();
+          };
+          if (select.options.length > 1) applySavedDepartment();
+          else {
+            const timer = setInterval(() => {
+              if (select.options.length > 1) {
+                clearInterval(timer);
+                applySavedDepartment();
+              }
+            }, 150);
+            setTimeout(() => clearInterval(timer), 8000);
+          }
+        }
       });
     }
 
