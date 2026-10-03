@@ -338,6 +338,93 @@
     }
     @media(prefers-reduced-motion:reduce){.btn{transition:none;}}
 
+  
+    /* Native-app inspired mobile UI */
+    :root{
+      --app-bg:#f3f6fb;--app-card:#ffffff;--app-text:#14243b;
+      --app-muted:#718096;--app-line:#e3eaf3;--app-blue:#1677f2;
+      --app-teal:#00a99a;--app-green:#14804a;
+    }
+    html{background:var(--app-bg)}
+    body{
+      background:var(--app-bg)!important;
+      color:var(--app-text);
+      padding:0 0 calc(18px + env(safe-area-inset-bottom))!important;
+      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    .card-main{
+      width:100%;max-width:600px!important;margin:0 auto!important;
+      border:0!important;border-radius:0 0 26px 26px!important;
+      box-shadow:0 8px 28px rgba(20,45,80,.07)!important;
+      background:var(--app-card)!important;overflow:hidden;
+    }
+    .card-header-gradient{
+      background:#fff!important;border-bottom:1px solid var(--app-line)!important;
+      padding:22px 20px!important;
+    }
+    .card-body{padding:18px 16px 24px!important;background:#fff}
+    #device-block{
+      background:#f6f9ff!important;border:1px solid #e0eaf8!important;
+      border-radius:20px!important;box-shadow:none!important;padding:20px!important;
+      margin-bottom:22px!important;
+    }
+    #dev-name{font-size:1.55rem;font-weight:750;letter-spacing:-.035em}
+    #dev-id{font-size:.93rem;color:var(--app-muted)}
+    .form-label{font-size:.94rem;font-weight:700;color:#263a55;margin-bottom:8px}
+    .form-control,.form-select{
+      min-height:54px!important;border:1px solid #dce5f0!important;
+      border-radius:15px!important;background:#f9fbfe!important;
+      color:var(--app-text)!important;padding:13px 15px!important;
+      box-shadow:none!important;font-size:1rem!important;
+    }
+    .form-control:focus,.form-select:focus{
+      background:#fff!important;border-color:#7ab4ff!important;
+      box-shadow:0 0 0 3px rgba(22,119,242,.10)!important;
+    }
+    .btn{border-radius:15px!important;font-weight:700!important}
+    #borrow-btn,#return-btn,.btn-success{
+      min-height:56px!important;background:var(--app-blue)!important;
+      border:0!important;box-shadow:none!important;
+    }
+    #borrow-btn{background:linear-gradient(110deg,#1677f2,#08a9b5)!important}
+    .history-panel{
+      margin-top:22px!important;padding:17px 14px!important;
+      background:#f7f9fc!important;border:1px solid var(--app-line)!important;
+      border-radius:22px!important;box-shadow:none!important;
+    }
+    .history-toolbar{align-items:center;margin-bottom:14px!important}
+    .section-kicker{font-size:.7rem!important;letter-spacing:.1em;color:#8494aa!important}
+    #history-heading{font-size:1.05rem;font-weight:750;color:var(--app-text)}
+    .history-refresh{
+      min-height:40px!important;padding:8px 12px!important;
+      background:#eaf2ff!important;border:0!important;color:#1266d6!important;
+      white-space:nowrap;
+    }
+    .history-summary{gap:8px!important}
+    .history-stat{background:#fff!important;border:1px solid var(--app-line)!important;border-radius:15px!important;padding:12px!important}
+    .history-stat strong{font-size:1.2rem!important;color:var(--app-text)!important}
+    .history-stat span{color:var(--app-muted)!important}
+    .history-list{gap:8px!important}
+    .history-item{
+      background:#fff!important;border:1px solid var(--app-line)!important;
+      border-radius:16px!important;padding:12px!important;
+    }
+    .history-icon{width:38px!important;height:38px!important;border-radius:13px!important}
+    .history-title{font-size:.94rem!important;color:#172b46!important}
+    .history-meta{font-size:.78rem!important;color:#77869b!important;line-height:1.6!important}
+    .history-note{background:#edf5ff!important;color:#245b9a!important}
+    .history-empty{
+      background:#fff;border:1px dashed #d7e1ee;border-radius:15px;
+      padding:22px 14px!important;color:#74839a!important;
+    }
+    #message{margin-top:10px}
+    hr{border-color:#e2e9f2!important;opacity:1}
+    @media(min-width:601px){
+      body{padding:24px 12px!important}
+      .card-main{border-radius:26px!important}
+    }
+
   </style>
 </head>
 <body>
@@ -874,12 +961,25 @@
       list.classList.add('history-loading');
       list.innerHTML = '<div class="history-empty"><span class="spinner-border spinner-border-sm me-2"></span>กำลังโหลดประวัติของคุณ...</div>';
 
-      apiCall({ action: 'userHistory', lineUserId }, res => {
+      apiCall({ action: 'userhistory', lineUserId }, res => {
         if (button) button.disabled = false;
         list.classList.remove('history-loading');
 
-        if (!res || !res.ok || !Array.isArray(res.data)) {
-          list.innerHTML = '<div class="history-empty">โหลดประวัติไม่สำเร็จ กรุณากดรีเฟรชอีกครั้ง</div>';
+        if (!res || res.ok !== true || !Array.isArray(res.data)) {
+          const detail = res && res.error ? String(res.error) : 'API ตอบกลับไม่ตรงรูปแบบที่คาดไว้';
+          list.innerHTML = '';
+          const errorBox = document.createElement('div');
+          errorBox.className = 'history-empty';
+          const title = document.createElement('div');
+          title.className = 'fw-bold mb-1';
+          title.textContent = 'โหลดประวัติไม่สำเร็จ';
+          const detailText = document.createElement('div');
+          detailText.textContent = detail;
+          const hint = document.createElement('div');
+          hint.className = 'small mt-2';
+          hint.textContent = 'หากเพิ่งอัปเดต Code.gs ให้ Deploy เป็น New version แล้วเปิด LIFF ใหม่';
+          errorBox.append(title, detailText, hint);
+          list.appendChild(errorBox);
           if (summary) summary.style.display = 'none';
           return;
         }
