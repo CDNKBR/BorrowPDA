@@ -425,6 +425,59 @@
       .card-main{border-radius:26px!important}
     }
 
+  
+    /* BorrowPDA app shell / native-style bottom navigation */
+    :root{--native-bg:#f3f6fb;--native-ink:#172b46;--native-muted:#7b8ba1;--native-line:#e4eaf2;--native-blue:#1677f2;--native-teal:#05a99b}
+    html,body{background:var(--native-bg)!important}
+    body{display:block!important;padding:0 0 calc(78px + env(safe-area-inset-bottom))!important;color:var(--native-ink)!important;font-size:15px!important}
+    .card-main{max-width:600px!important;width:100%!important;margin:0 auto!important;border:0!important;border-radius:0!important;box-shadow:none!important;background:#fff!important;overflow:visible!important;min-height:100svh}
+    .card-header-gradient{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.96)!important;color:var(--native-ink)!important;border-bottom:1px solid var(--native-line)!important;padding:15px 17px!important;backdrop-filter:blur(14px)}
+    .liff-badge{color:var(--native-blue)!important;font-size:.68rem!important;font-weight:800}
+    .card-header-gradient .fw-semibold{font-size:1.2rem;letter-spacing:-.03em}
+    .card-header-gradient .small{color:var(--native-muted)!important}
+    .card-body{padding:18px 16px 28px!important;background:#fff!important;min-height:calc(100svh - 92px)}
+    .app-tab{display:none;animation:tabFade .18s ease}
+    .app-tab.active{display:block}
+    @keyframes tabFade{from{opacity:.5;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+    .native-page-title{font-size:1.35rem;font-weight:800;letter-spacing:-.04em;margin:3px 0 18px}
+    #device-block{background:#f4f8ff!important;border:1px solid #e6edf7!important;border-radius:22px!important;padding:20px!important;box-shadow:none!important;margin-bottom:22px!important}
+    #dev-name{font-size:1.55rem!important;font-weight:800!important;letter-spacing:-.04em;color:var(--native-ink)!important}
+    #dev-id{font-size:.9rem!important;color:var(--native-muted)!important}
+    .status-pill{font-size:.82rem!important;padding:8px 13px!important}
+    .form-label{font-size:.9rem!important;font-weight:750!important;color:#2a3d56!important;margin-bottom:8px!important}
+    .form-control,.form-select{min-height:52px!important;border:1px solid #dce5f0!important;border-radius:14px!important;background:#f9fbfe!important;color:var(--native-ink)!important;box-shadow:none!important;font-size:1rem!important}
+    .form-control:focus,.form-select:focus{border-color:#8bbcff!important;box-shadow:0 0 0 3px rgba(22,119,242,.1)!important}
+    .btn{border-radius:15px!important;font-weight:750!important}
+    #form-borrow .btn-success,#form-return .btn-danger{min-height:54px!important;border:0!important;background:linear-gradient(105deg,var(--native-blue),var(--native-teal))!important;color:white!important;box-shadow:0 8px 18px rgba(22,119,242,.15)!important}
+    .app-message{margin-top:12px}
+    .history-panel{margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+    .history-toolbar{display:flex;gap:10px;justify-content:space-between;align-items:center;margin:4px 0 18px!important}
+    .section-kicker{font-size:.68rem!important;letter-spacing:.12em;font-weight:800;color:#8a9ab0!important}
+    #history-heading{font-size:1.25rem!important;font-weight:800!important;color:var(--native-ink)!important}
+    .history-refresh{min-height:42px!important;padding:8px 12px!important;background:#edf4ff!important;border:0!important;color:var(--native-blue)!important;white-space:nowrap}
+    .history-summary{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-bottom:14px}
+    .history-stat{background:#f3f7fd!important;border:1px solid #e5edf8!important;border-radius:18px!important;padding:15px!important}
+    .history-stat strong{font-size:1.5rem!important;color:#1d3a60!important}
+    .history-stat span{color:var(--native-muted)!important}
+    .history-list{display:flex;flex-direction:column;gap:10px!important}
+    .history-item{background:#fff!important;border:1px solid var(--native-line)!important;border-radius:17px!important;padding:13px!important;box-shadow:0 3px 12px rgba(24,48,80,.035)}
+    .history-empty{background:#f7f9fc!important;border:1px dashed #d9e3ef!important;border-radius:17px!important;padding:24px 15px!important;color:var(--native-muted)!important;text-align:center}
+    .profile-card{display:flex;flex-direction:column;align-items:center;text-align:center;padding:26px 18px;margin-bottom:16px;background:#f4f8ff;border:1px solid #e4edf9;border-radius:22px}
+    #profile-picture-large{width:84px;height:84px;border-radius:50%;object-fit:cover;background:#e8eef8;border:3px solid #fff;box-shadow:0 4px 14px rgba(23,43,70,.1);margin-bottom:12px}
+    .profile-name{font-size:1.2rem;font-weight:800;color:var(--native-ink)}
+    .profile-id{font-size:.8rem;color:var(--native-muted);margin-top:3px}
+    .settings-row{display:flex;align-items:center;gap:12px;padding:15px 2px;border-bottom:1px solid var(--native-line)}
+    .settings-icon{width:42px;height:42px;display:grid;place-items:center;background:#edf4ff;color:var(--native-blue);border-radius:14px;font-size:1.15rem;flex:0 0 auto}
+    .settings-label{font-size:.78rem;color:var(--native-muted)}
+    .settings-value{font-weight:700;color:var(--native-ink);margin-top:2px}
+    .native-secondary-btn{min-height:48px;border:1px solid #dce7f5;background:#f6f9fe;color:var(--native-blue);border-radius:14px;font-weight:750}
+    .bottom-nav{position:fixed;z-index:100;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:600px;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(255,255,255,.96);border-top:1px solid #e4eaf2;backdrop-filter:blur(18px)}
+    .nav-item{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:51px;border:0;background:transparent;color:#8b98aa;font-size:.7rem;font-weight:650;border-radius:13px}
+    .nav-item i{font-size:1.25rem;line-height:1.1}
+    .nav-item.active{color:var(--native-blue);background:#edf4ff}
+    .nav-dot{display:none;position:absolute;top:6px;right:calc(50% - 20px);width:6px;height:6px;background:#ef4444;border-radius:50%}
+    @media(min-width:601px){body{padding:24px 0 100px!important}.card-main{max-width:480px!important;border-radius:28px!important;overflow:hidden!important;min-height:calc(100svh - 124px);box-shadow:0 10px 36px rgba(30,55,90,.1)!important}.card-header-gradient{position:relative}.bottom-nav{bottom:14px;border:1px solid var(--native-line);border-radius:20px;box-shadow:0 8px 28px rgba(30,55,90,.12)}}
+
   </style>
 </head>
 <body>
@@ -449,6 +502,7 @@
     </div>
 
     <div class="card-body">
+      <section class="app-tab active" id="tab-borrow" aria-label="ยืมคืนอุปกรณ์">
       <div id="device-block" class="mb-3">
         <h5 class="fw-semibold mb-1" id="dev-name">กำลังโหลด...</h5>
         <div class="text-muted small mb-2" id="dev-id"></div>
@@ -489,9 +543,10 @@
         </button>
       </div>
 
-      <hr class="my-3 border-secondary">
-      <div id="message" class="small text-muted"></div>
+        <div id="message" class="small text-muted app-message"></div>
+      </section>
 
+      <section class="app-tab" id="tab-history" aria-label="ประวัติยืมคืน">
       <section id="user-history" class="history-panel" aria-labelledby="history-heading">
         <div class="history-toolbar">
           <div>
@@ -507,6 +562,45 @@
           <div class="history-empty"><i class="bi bi-person-check me-1"></i>กำลังตรวจสอบบัญชี LINE...</div>
         </div>
       </section>
+      </section>
+
+      <section class="app-tab" id="tab-profile" aria-label="บัญชีของฉัน">
+        <div class="native-page-title">บัญชีของฉัน</div>
+        <div class="profile-card">
+          <img id="profile-picture-large" alt="รูปโปรไฟล์ LINE" src="" />
+          <div class="profile-name" id="profile-name-large">กำลังโหลดโปรไฟล์...</div>
+          <div class="profile-id" id="profile-id-large"></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon"><i class="bi bi-building"></i></div>
+          <div class="settings-copy">
+            <div class="settings-label">แผนกที่เลือกสำหรับการยืม</div>
+            <div class="settings-value" id="profile-department">ยังไม่ได้เลือกแผนก</div>
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-icon"><i class="bi bi-shield-check"></i></div>
+          <div class="settings-copy">
+            <div class="settings-label">การเข้าสู่ระบบ</div>
+            <div class="settings-value">ใช้งานผ่าน LINE LIFF</div>
+          </div>
+        </div>
+        <button type="button" class="native-secondary-btn w-100 mt-3" onclick="loadUserHistory(); setActiveTab('history')">
+          <i class="bi bi-clock-history me-2"></i>ดูประวัติยืม–คืน
+        </button>
+      </section>
+
+      <nav class="bottom-nav" aria-label="เมนูหลัก">
+        <button type="button" class="nav-item active" data-tab="borrow" onclick="setActiveTab('borrow')">
+          <i class="bi bi-box-seam"></i><span>ยืมอุปกรณ์</span>
+        </button>
+        <button type="button" class="nav-item" data-tab="history" onclick="setActiveTab('history')">
+          <i class="bi bi-clock-history"></i><span>ประวัติ</span><span class="nav-dot" id="history-nav-dot"></span>
+        </button>
+        <button type="button" class="nav-item" data-tab="profile" onclick="setActiveTab('profile')">
+          <i class="bi bi-person-circle"></i><span>บัญชีของฉัน</span>
+        </button>
+      </nav>
     </div>
   </div>
 
@@ -1035,6 +1129,34 @@
         });
       });
     }
+
+
+    function setActiveTab(tabName){
+      document.querySelectorAll('.app-tab').forEach(el => el.classList.toggle('active', el.id === 'tab-' + tabName));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tabName));
+      if(tabName === 'history') loadUserHistory();
+      if(tabName === 'profile') syncProfilePanel();
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function syncProfilePanel(){
+      const name = document.getElementById('user-name')?.textContent || 'ผู้ใช้ LINE';
+      const uid = document.getElementById('user-id')?.textContent || '';
+      const pic = document.getElementById('user-picture')?.src || '';
+      const nameEl = document.getElementById('profile-name-large');
+      const idEl = document.getElementById('profile-id-large');
+      const picEl = document.getElementById('profile-picture-large');
+      if(nameEl) nameEl.textContent = name.trim() || 'ผู้ใช้ LINE';
+      if(idEl) idEl.textContent = uid;
+      if(picEl && pic && pic !== window.location.href) picEl.src = pic;
+      const dept = document.getElementById('department')?.value || '';
+      const deptEl = document.getElementById('profile-department');
+      if(deptEl) deptEl.textContent = dept || 'ยังไม่ได้เลือกแผนก';
+    }
+
+    document.addEventListener('change', event => {
+      if(event.target && event.target.id === 'department') syncProfilePanel();
+    });
 
     function apiCall(params, done) {
       if (!API_URL || API_URL.includes('PASTE_YOUR_')) {
