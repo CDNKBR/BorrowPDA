@@ -324,8 +324,9 @@
         <label class="form-label small fw-semibold mt-2" for="department">
           <i class="bi bi-building me-1"></i>แผนก
         </label>
-        <input type="text" class="form-control mb-2" id="department"
-              placeholder="ระบุแผนกของผู้ยืม" autocomplete="organization" required>
+        <select class="form-select mb-2" id="department" required>
+          <option value="">กำลังโหลดรายการแผนก...</option>
+        </select>
         <div class="small text-muted mb-3"><i class="bi bi-clock me-1"></i>ยืมได้ 10 ชั่วโมงต่ออุปกรณ์ และต้องคืนก่อนผู้ใช้อื่นยืมต่อ</div>
 
         <button class="btn btn-success w-100 py-3" onclick="borrow()">
@@ -613,7 +614,29 @@
         setMessage('ไม่พบพารามิเตอร์ device ใน URL กรุณาสแกน QR อุปกรณ์อีกครั้ง');
         return;
       }
+      loadDepartments();
       loadDevice();
+    }
+
+    function loadDepartments(){
+      const select = document.getElementById('department');
+      if (!select) return;
+      select.innerHTML = '<option value="">กำลังโหลดรายการแผนก...</option>';
+      apiCall({ action: 'departments' }, res => {
+        if (!res || !res.ok || !Array.isArray(res.data)) {
+          select.innerHTML = '<option value="">โหลดแผนกไม่สำเร็จ</option>';
+          return;
+        }
+        const departments = [...new Set(res.data.map(v => String(v || '').trim()).filter(Boolean))];
+        select.innerHTML = '<option value="">-- เลือกแผนก --</option>';
+        departments.forEach(dept => {
+          const option = document.createElement('option');
+          option.value = dept;
+          option.textContent = dept;
+          select.appendChild(option);
+        });
+        if (!departments.length) select.innerHTML = '<option value="">ไม่พบข้อมูลแผนกใน Config</option>';
+      });
     }
 
     function loadDevice(){
