@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>SD IT Equipment Dashboard</title>
+
+  <!-- IBM Plex Sans Thai -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- DataTables (ยังใช้กับประวัติยืม–คืน) -->
+  <link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet">
+
+  
+
+<link rel="stylesheet" href="./css/admin.css">
+</head>
+<body>
+
+<div class="dash-shell">
+
+  <!-- Login overlay -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-sub mb-1">SD IT EQUIPMENT</div>
+      <div class="login-title d-flex align-items-center gap-2">
+        <i class="bi bi-shield-lock-fill text-warning"></i>
+        เข้าสู่ระบบ SD
+      </div>
+      <p class="mb-3 text-secondary" style="font-size:.86rem">
+        ใส่รหัสผ่านสำหรับ SD เพื่อดูภาพรวมการยืม–คืน อุปกรณ์ทั้งหมดในระบบ
+      </p>
+
+      <label class="form-label small mb-1">รหัสผ่าน</label>
+      <div class="input-group mb-1">
+        <span class="input-group-text bg-dark border-0 text-secondary"><i class="bi bi-key-fill"></i></span>
+        <input type="password" id="admin-pass" class="form-control bg-dark text-light border-0" placeholder="••••••">
+        <button class="btn btn-danger" type="button" onclick="doAdminLogin()">
+          <i class="bi bi-box-arrow-in-right me-1"></i> เข้าสู่ระบบ
+        </button>
+      </div>
+      <div id="login-error" class="badge-error d-none">
+        รหัสผ่านไม่ถูกต้อง
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <div class="dash-header-sub mb-1">SD IT EQUIPMENT</div>
+      <div class="dash-title d-flex align-items-center gap-2">
+        <i class="bi bi-clipboard2-data-fill text-info"></i>
+        SD Dashboard
+      </div>
+      <div class="text-secondary" style="font-size:.86rem">
+        ภาพรวมสถานะการยืม–คืนอุปกรณ์ทั้งหมดในระบบ
+      </div>
+    </div>
+    <div class="d-flex flex-column align-items-end gap-2">
+      <div class="d-flex gap-2">
+        <span class="pill"><i class="bi bi-shield-check"></i>Admin Only</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="row g-3 mb-2">
+    <div class="col-md-3 col-6">
+      <div class="stat-card stat-total">
+        <div class="label"><i class="bi bi-hdd-stack"></i> ทั้งหมด</div>
+        <div id="sum-total" class="value">-</div>
+        <div class="icon-wrap"><i class="bi bi-hdd-network"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="stat-card stat-borrowed">
+        <div class="label"><i class="bi bi-arrow-left-right"></i> กำลังยืม</div>
+        <div id="sum-borrowed" class="value">-</div>
+        <div class="icon-wrap"><i class="bi bi-arrow-repeat"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="stat-card stat-available">
+        <div class="label"><i class="bi bi-check2-circle"></i> ว่าง</div>
+        <div id="sum-available" class="value">-</div>
+        <div class="icon-wrap"><i class="bi bi-check-lg"></i></div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="stat-card stat-overdue">
+        <div class="label"><i class="bi bi-exclamation-triangle-fill"></i> เกินกำหนดส่งคืน</div>
+        <div id="sum-overdue" class="value">-</div>
+        <div class="icon-wrap"><i class="bi bi-alarm"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="d-flex justify-content-between align-items-center mt-2">
+    <div class="tab-strip">
+      <button id="tab-dev" class="tab-pill active" type="button" onclick="switchTab('devices')">
+        <i class="bi bi-display"></i> รายการอุปกรณ์
+      </button>
+      <button id="tab-tx" class="tab-pill" type="button" onclick="switchTab('tx')">
+        <i class="bi bi-clock-history"></i> ประวัติยืม–คืน
+      </button>
+      <button id="tab-users" class="tab-pill" type="button" onclick="switchTab('users')">
+        <i class="bi bi-people"></i> ผู้ลงทะเบียน
+      </button>
+    </div>
+  </div>
+
+  <!-- Shell -->
+  <div class="table-shell mt-2">
+    <div class="table-head">
+      <div class="fw-semibold" id="table-title">รายการอุปกรณ์</div>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <span id="refresh-status" class="refresh-status">ข้อมูลล่าสุดเมื่อ —</span>
+        <button id="refresh-btn" class="btn btn-outline-primary btn-sm btn-add refresh-btn" type="button" onclick="refreshDashboard()">
+          <i class="bi bi-arrow-clockwise me-1"></i> รีเฟรช
+        </button>
+        <button class="btn btn-outline-secondary btn-sm btn-add" type="button" onclick="openPrintModal()">
+          <i class="bi bi-qr-code me-1"></i> พิมพ์สติ๊กเกอร์ QR
+        </button>
+        <button class="btn btn-primary btn-sm btn-add" type="button" onclick="openAddDeviceModal()">
+          <i class="bi bi-plus-circle me-1"></i> เพิ่มอุปกรณ์
+        </button>
+      </div>
+    </div>
+
+    <div id="device-filters" class="row g-2 mb-3">
+      <div class="col-md-7">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-0"><i class="bi bi-search text-primary"></i></span>
+          <input id="device-search" class="form-control filter-control border-start-0" type="search" placeholder="ค้นหารหัส ชื่อ หรือหมวดหมู่อุปกรณ์..." oninput="applyDeviceFilters()">
+        </div>
+      </div>
+      <div class="col-md-3 col-7">
+        <select id="device-status-filter" class="form-select filter-control" onchange="applyDeviceFilters()">
+          <option value="">ทุกสถานะ</option>
+          <option value="Available">ว่าง พร้อมยืม</option>
+          <option value="Borrowed">กำลังยืม</option>
+          <option value="Repair">เสีย/ส่งซ่อม</option>
+          <option value="Overdue">เกินกำหนดส่งคืน</option>
+        </select>
+      </div>
+      <div class="col-md-2 col-5">
+        <button class="btn btn-outline-primary w-100 btn-add" type="button" onclick="resetDeviceFilters()"><i class="bi bi-arrow-counterclockwise me-1"></i>ล้างตัวกรอง</button>
+      </div>
+    </div>
+
+    <!-- การ์ดอุปกรณ์ -->
+    <div id="wrap-devices">
+      <div id="device-grid" class="device-grid"></div>
+    </div>
+
+    <!-- ประวัติยืม–คืน -->
+    <div id="wrap-tx" style="display:none">
+      <table id="tbl-tx" class="display nowrap" style="width:100%">
+        <thead>
+          <tr>
+            <th>เวลา</th>
+            <th>รหัส</th>
+            <th>ประเภท</th>
+            <th>ผู้ใช้</th>
+            <th>Line User</th>
+            <th>แผนก</th>
+            <th>ยืมเมื่อ</th>
+            <th>กำหนดคืน</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Registered Users -->
+    <div id="wrap-users" style="display:none">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div class="small text-secondary"><i class="bi bi-info-circle me-1"></i>รายชื่อผู้ใช้ที่ลงทะเบียนแล้วในชีต Users</div>
+        <div class="input-group" style="max-width:360px">
+          <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+          <input id="user-search" class="form-control filter-control" type="search" placeholder="ค้นหาชื่อ แผนก หรือ LINE ID..." oninput="applyUserFilters()">
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table id="tbl-users" class="display nowrap" style="width:100%">
+          <thead><tr><th>ผู้ใช้</th><th>แผนก</th><th>LINE User ID</th><th>ลงทะเบียนเมื่อ</th><th>รายละเอียด</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Registered user detail -->
+<div class="modal fade" id="modal-user-detail" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 rounded-4 overflow-hidden">
+      <div class="modal-header border-0 px-4 pt-4 pb-2">
+        <div><div class="small text-primary fw-bold text-uppercase" style="letter-spacing:.12em">Registered User</div><h5 class="modal-title fw-bold mb-0">รายละเอียดผู้ลงทะเบียน</h5></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body px-4 pb-4">
+        <div class="d-flex align-items-center gap-3 p-3 rounded-4 mb-3" style="background:linear-gradient(135deg,#eff6ff,#f8fbff)">
+          <img id="user-detail-photo" alt="User profile" class="rounded-circle border shadow-sm" style="width:96px;height:96px;object-fit:cover;background:#e2e8f0">
+          <div class="min-w-0"><div class="fw-bold fs-4 text-dark text-break" id="user-detail-name">-</div><div class="small text-secondary text-break" id="user-detail-lineid">-</div><span class="badge rounded-pill text-bg-light border mt-2" id="user-detail-dept">แผนก: -</span></div>
+        </div>
+        <div class="row g-3">
+          <div class="col-sm-6"><div class="bg-light rounded-3 p-3 h-100"><div class="small text-secondary">วันที่ลงทะเบียน</div><div class="fw-semibold" id="user-detail-created">-</div></div></div>
+          <div class="col-sm-6"><div class="bg-light rounded-3 p-3 h-100"><div class="small text-secondary">อัปเดตล่าสุด</div><div class="fw-semibold" id="user-detail-updated">-</div></div></div>
+          <div class="col-12"><div class="border rounded-4 p-3"><div class="fw-bold mb-2"><i class="bi bi-clock-history me-2 text-primary"></i>ประวัติยืม–คืนของผู้ใช้นี้</div><div id="user-detail-activity" class="small text-secondary">ไม่มีประวัติ</div></div></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4 pt-0"><button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">ปิด</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Transaction detail -->
+<div class="modal fade" id="modal-tx-detail" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content border-0 rounded-4 overflow-hidden">
+      <div class="modal-header border-0 px-4 pt-4 pb-2">
+        <div>
+          <div class="small text-primary fw-bold text-uppercase" style="letter-spacing:.12em">Transaction Details</div>
+          <h5 class="modal-title fw-bold mb-0" id="tx-detail-title">รายละเอียดรายการยืม–คืน</h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body px-4 pb-4">
+        <div class="d-flex align-items-center gap-3 p-3 rounded-4 mb-3" style="background:linear-gradient(135deg,#eff6ff,#f8fbff)">
+          <img id="tx-detail-photo" src="" alt="User profile" class="rounded-circle border shadow-sm" style="width:88px;height:88px;object-fit:cover;background:#e2e8f0">
+          <div class="min-w-0">
+            <div class="fw-bold fs-5 text-dark text-break" id="tx-detail-user">-</div>
+            <div class="small text-secondary text-break" id="tx-detail-lineid">LINE User ID: -</div>
+            <div class="mt-2"><span class="badge rounded-pill text-bg-light border" id="tx-detail-dept">แผนก: -</span></div>
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            <div class="border rounded-4 p-3 h-100">
+              <div class="small text-secondary mb-1">อุปกรณ์</div>
+              <div class="fw-bold fs-5" id="tx-detail-device">-</div>
+              <div class="small text-secondary" id="tx-detail-category">-</div>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="border rounded-4 p-3 h-100">
+              <div class="small text-secondary mb-1">ประเภทรายการ</div>
+              <div id="tx-detail-action" class="fw-bold fs-5">-</div>
+              <div class="small text-secondary" id="tx-detail-time">-</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-sm-6"><div class="rounded-3 p-3 bg-light h-100"><div class="small text-secondary">เวลาเริ่มยืม</div><div class="fw-semibold" id="tx-detail-borrowed">-</div></div></div>
+          <div class="col-sm-6"><div class="rounded-3 p-3 bg-light h-100"><div class="small text-secondary">กำหนดคืน</div><div class="fw-semibold" id="tx-detail-due">-</div></div></div>
+          <div class="col-12"><div class="rounded-3 p-3 bg-light"><div class="small text-secondary">หมายเหตุ / แผนก ณ เวลาทำรายการ</div><div class="fw-semibold text-break" id="tx-detail-note">-</div></div></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0 px-4 pb-4 pt-0">
+        <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-dismiss="modal">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Admin notice -->
+<div class="modal fade" id="modal-admin-notice" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0">
+      <div class="modal-body text-center p-4">
+        <i id="admin-notice-icon" class="bi bi-info-circle text-primary fs-1"></i>
+        <h5 id="admin-notice-title" class="mt-3 mb-2">แจ้งเตือน</h5>
+        <div id="admin-notice-message" class="text-secondary"></div>
+        <button type="button" class="btn btn-primary btn-add mt-4 px-4" data-bs-dismiss="modal">ตกลง</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal: Confirm action -->
+<div class="modal fade" id="modal-admin-confirm" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0">
+      <div class="modal-body text-center p-4">
+        <i class="bi bi-question-circle text-warning fs-1"></i>
+        <h5 id="admin-confirm-title" class="mt-3 mb-2">ยืนยัน</h5>
+        <div id="admin-confirm-message" class="text-secondary"></div>
+        <div class="d-flex justify-content-center gap-2 mt-4">
+          <button type="button" class="btn btn-light btn-add px-4" data-bs-dismiss="modal">ยกเลิก</button>
+          <button type="button" id="admin-confirm-yes" class="btn btn-danger btn-add px-4">ยืนยันการลบ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading" class="loading-overlay">
+  <div class="text-center">
+    <div class="lds-ring mb-3"><div></div><div></div><div></div><div></div></div>
+    <div class="text-light small">กำลังโหลดข้อมูล...</div>
+  </div>
+</div>
+
+<!-- Sticker print layer -->
+<div id="print-layer" class="print-layer">
+  <div class="sticker-toolbar no-print d-flex justify-content-between align-items-center mb-2">
+    <div class="fw-semibold">พิมพ์สติ๊กเกอร์ QR อุปกรณ์ IT</div>
+    <button class="btn btn-outline-secondary btn-sm" type="button" onclick="closePrintLayer()">
+      <i class="bi bi-x-lg me-1"></i> ปิด
+    </button>
+  </div>
+  <div id="sticker-container" class="sticker-sheet"></div>
+</div>
+
+<!-- Modal: add/update device -->
+<div class="modal fade" id="modal-device" tabindex="-1" aria-labelledby="modal-device-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <div class="modal-title" id="modal-device-title">
+            <span class="device-modal-title-icon"><i class="bi bi-pc-display-horizontal"></i></span>
+            <span>
+              เพิ่ม / แก้ไขอุปกรณ์
+              <span class="device-modal-subtitle">จัดการข้อมูลอุปกรณ์และข้อมูลประจำเครื่อง</span>
+            </span>
+          </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-section">
+          <div class="modal-section-title"><i class="bi bi-info-circle-fill"></i>ข้อมูลอุปกรณ์</div>
+          <div class="device-info-row">
+            <div class="device-field">
+              <label class="form-label" for="dev-id">รหัสอุปกรณ์ <span class="required">*</span></label>
+              <input type="text" id="dev-id" class="form-control" placeholder="เช่น PDA06" autocomplete="off">
+            </div>
+            <div class="device-field">
+              <label class="form-label" for="dev-name">ชื่ออุปกรณ์</label>
+              <input type="text" id="dev-name" class="form-control" placeholder="เช่น FF-06" autocomplete="off">
+            </div>
+          </div>
+          <div class="device-field">
+            <label class="form-label" for="dev-cat">หมวดอุปกรณ์</label>
+            <input type="text" id="dev-cat" class="form-control" placeholder="เช่น PDA, Notebook, Monitor" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-section-title"><i class="bi bi-fingerprint"></i>ข้อมูลประจำเครื่อง</div>
+          <div class="device-info-row">
+            <div class="device-field">
+              <label class="form-label" for="dev-serial">Serial Number</label>
+              <input type="text" id="dev-serial" class="form-control" placeholder="เช่น MT65522WEXDE00044" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="device-field">
+              <label class="form-label" for="dev-mac">MAC Address</label>
+              <input type="text" id="dev-mac" class="form-control" placeholder="A4:E8:A3:82:2C:BA" autocomplete="off" spellcheck="false" maxlength="17">
+            </div>
+          </div>
+          <div class="field-hint"><i class="bi bi-shield-check me-1"></i>MAC Address จะถูกบันทึกเป็นตัวพิมพ์ใหญ่โดยอัตโนมัติ</div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-section-title"><i class="bi bi-sliders2"></i>การตั้งค่า</div>
+          <div class="device-info-row">
+            <div class="device-field">
+              <label class="form-label" for="dev-icon">ไอคอนอุปกรณ์</label>
+              <select id="dev-icon" class="form-select">
+                <option value="box">กล่อง / อุปกรณ์ทั่วไป</option>
+                <option value="pda">PDA / Handheld</option>
+                <option value="laptop">Laptop / Notebook</option>
+                <option value="monitor">Monitor / Display</option>
+                <option value="printer">Printer / Scanner</option>
+              </select>
+            </div>
+            <div class="device-field">
+              <label class="form-label" for="dev-status">สถานะเริ่มต้น</label>
+              <div class="status-wrap">
+                <span class="status-dot"></span>
+                <select id="dev-status" class="form-select">
+                  <option value="Available">ว่าง พร้อมยืม</option>
+                  <option value="Borrowed">กำลังยืม</option>
+                  <option value="Repair">เสีย / ส่งซ่อม</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div id="dev-modal-msg" class="small mt-1 d-none"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+          <i class="bi bi-x-lg me-1"></i>ยกเลิก
+        </button>
+        <button type="button" class="btn btn-primary" onclick="saveDeviceFromAdmin()">
+          <i class="bi bi-check2 me-1"></i>บันทึกข้อมูล
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: เลือกอุปกรณ์พิมพ์ QR -->
+<div class="modal fade" id="modal-print" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-light border-0 rounded-4">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="bi bi-qr-code me-1"></i> พิมพ์สติ๊กเกอร์ QR</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-1">
+        <div class="mb-2">
+          <label class="form-label small">ชนิดลิงก์ที่ต้องการพิมพ์</label>
+          <select id="qr-type" class="form-select form-select-sm bg-black text-light border-secondary">
+            <option value="both">LIFF + Web (2 ใบ/อุปกรณ์)</option>
+            <option value="liff">เฉพาะ LIFF</option>
+            <option value="web">เฉพาะ Web</option>
+          </select>
+        </div>
+        <div class="mb-2 small text-secondary">
+          เลือกอุปกรณ์ที่ต้องการพิมพ์สติ๊กเกอร์:
+        </div>
+        <div id="print-device-list" class="list-group small" style="max-height:320px;overflow:auto;"></div>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-light btn-sm" data-bs-dismiss="modal">ยกเลิก</button>
+        <button type="button" class="btn btn-success btn-sm" onclick="handlePrintStickers()">
+          <i class="bi bi-printer-fill me-1"></i> พิมพ์สติ๊กเกอร์
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- jQuery + Bootstrap + DataTables -->
+
+
+
+<!-- QRCode.js -->
+
+
+
+
+
+<script src="./js/admin.js"></script>
+</body>
+</html>
