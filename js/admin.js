@@ -386,48 +386,89 @@ let adminPass = '';
 
   function renderDashboard(data){
     hideLoading();
-    if(!data) return;
 
-    devicesCache = data.devices || [];
-    usersCache = data.users || [];
-    window.dashboardTransactions = data.transactions || [];
-    renderRegisteredUsers(usersCache);
-    const refreshStatus = document.getElementById('refresh-status');
-    if (refreshStatus) refreshStatus.textContent = 'อัปเดต ' + new Date().toLocaleTimeString('th-TH', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    if(!data){
+      showAdminNotice('โหลดข้อมูลไม่สำเร็จ', 'API ไม่ได้ส่งข้อมูลกลับมา', 'danger');
+      return;
+    }
 
+    // เก็บข้อมูลก่อน เพื่อให้ Dashboard ยังแสดงได้แม้ DataTables/ส่วนเสริมใด ๆ มีปัญหา
+    devicesCache = Array.isArray(data.devices) ? data.devices : [];
+    usersCache = Array.isArray(data.users) ? data.users : [];
+    window.dashboardTransactions = Array.isArray(data.transactions) ? data.transactions : [];
+
+    // Summary ต้องแสดงก่อนเสมอ
     const sum = data.summary || { total:0, borrowed:0, available:0, overdue:0 };
-    document.getElementById('sum-total').textContent     = sum.total;
-    document.getElementById('sum-borrowed').textContent  = sum.borrowed;
-    document.getElementById('sum-available').textContent = sum.available;
-    document.getElementById('sum-overdue').textContent   = sum.overdue;
+    const elTotal = document.getElementById('sum-total');
+    const elBorrowed = document.getElementById('sum-borrowed');
+    const elAvailable = document.getElementById('sum-available');
+    const elOverdue = document.getElementById('sum-overdue');
 
-    applyDeviceFilters();
+    if (elTotal) elTotal.textContent = Number(sum.total ?? 0);
+    if (elBorrowed) elBorrowed.textContent = Number(sum.borrowed ?? 0);
+    if (elAvailable) elAvailable.textContent = Number(sum.available ?? 0);
+    if (elOverdue) elOverdue.textContent = Number(sum.overdue ?? 0);
 
-    const txTable = $('#tbl-tx').DataTable({
-      destroy:true,
-      data: data.transactions || [],
-      columns:[
-        {data:'Timestamp'},
-        {data:'DeviceID'},
-        {data:'Action'},
-        {data:'UserName'},
-        {data:'LineUserId'},
-        {data:'Note'},
-        {data:'BorrowedAt'},
-        {data:'DueAt'}
-      ],
-      order:[[0,'desc']],
-      responsive:true,
-      createdRow: function(row, rowData) {
-        row.setAttribute('title', 'คลิกเพื่อดูรายละเอียดผู้ใช้และอุปกรณ์');
-        row.dataset.txIndex = String((data.transactions || []).indexOf(rowData));
+    const refreshStatus = document.getElementById('refresh-status');
+    if (refreshStatus) {
+      refreshStatus.textContent = 'อัปเดต ' + new Date().toLocaleTimeString('th-TH', {
+        hour:'2-digit', minute:'2-digit', second:'2-digit'
+      });
+    }
+
+    // รายการอุปกรณ์ไม่พึ่ง DataTables
+    try {
+      applyDeviceFilters();
+    } catch (err) {
+      console.error('render devices error:', err);
+    }
+
+    // DataTables เป็นส่วนเสริม: ถ้าโหลดไม่ได้ ให้ Dashboard หลักยังทำงานต่อ
+    const hasDataTables =
+      window.jQuery &&
+      jQuery.fn &&
+      typeof jQuery.fn.DataTable === 'function';
+
+    if (hasDataTables) {
+      try {
+        renderRegisteredUsers(usersCache);
+
+        const txTable = $('#tbl-tx').DataTable({
+          destroy:true,
+          data: window.dashboardTransactions,
+          columns:[
+            {data:'Timestamp'},
+            {data:'DeviceID'},
+            {data:'Action'},
+            {data:'UserName'},
+            {data:'LineUserId'},
+            {data:'Note'},
+            {data:'BorrowedAt'},
+            {data:'DueAt'}
+          ],
+          order:[[0,'desc']],
+          responsive:true,
+          createdRow: function(row, rowData) {
+            row.setAttribute('title', 'คลิกเพื่อดูรายละเอียดผู้ใช้และอุปกรณ์');
+            row.dataset.txIndex = String(window.dashboardTransactions.indexOf(rowData));
+          }
+        });
+
+        $('#tbl-tx tbody').off('click.txdetail').on('click.txdetail', 'tr', function() {
+          const rowData = txTable.row(this).data();
+          if (rowData) openTransactionDetail(rowData);
+        });
+      } catch (err) {
+        console.error('DataTables render error:', err);
+        showAdminNotice(
+          'โหลดข้อมูลหลักสำเร็จ',
+          'Dashboard และรายการอุปกรณ์โหลดได้ แต่ส่วนตารางประวัติ/ผู้ลงทะเบียนมีปัญหา: ' + errorText(err),
+          'warning'
+        );
       }
-    });
-
-    $('#tbl-tx tbody').off('click.txdetail').on('click.txdetail', 'tr', function() {
-      const rowData = txTable.row(this).data();
-      if (rowData) openTransactionDetail(rowData);
-    });
+    } else {
+      console.warn('DataTables ไม่พร้อมใช้งาน — ข้ามการสร้างตารางประวัติ/ผู้ลงทะเบียน');
+    }
   }
 
   function openTransactionDetail(tx){
